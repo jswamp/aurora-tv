@@ -103,18 +103,12 @@ bool pointer_gesture_handle_mbutton(stream_input_t *input, const SDL_MouseButton
         return false;
     }
 
-    uint32_t releasedAt = event->timestamp != 0 ? event->timestamp : SDL_GetTicks();
-    uint32_t heldMs = releasedAt - input->pointerGesturePressTime;
-
     pointer_gesture_send_position(input, event->x, event->y);
 
     if (input->pointerGestureDragging) {
         if (input->pointerGestureLeftDown) {
             LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
         }
-    } else if (heldMs >= GESTURE_LONG_PRESS_MS) {
-        LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_RIGHT);
-        LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
     } else {
         LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_LEFT);
         LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);

@@ -181,10 +181,21 @@ static void sdl_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     } else if (SDL_PeepEvents(&e, 1, SDL_GETEVENT, SDL_KEYDOWN, SDL_KEYUP) > 0) {
 #if TARGET_WEBOS
         webos_key_input_mode(input, &e.key);
-        /* punktfunk-style: Yellow cycles on-screen log (Off → Live → Frozen). */
-        if ((int) e.key.keysym.scancode == SDL_SCANCODE_WEBOS_YELLOW) {
+        /* Green cycles the on-screen log (Off → Live → Frozen). */
+        if ((int) e.key.keysym.scancode == SDL_SCANCODE_WEBOS_GREEN) {
             if (e.type == SDL_KEYDOWN) {
                 log_overlay_cycle();
+            }
+            state->state = LV_INDEV_STATE_RELEASED;
+            data->continue_reading = true;
+            return;
+        }
+        /* Yellow is the right mouse button while streaming: held down, it stays down. */
+        if ((int) e.key.keysym.scancode == SDL_SCANCODE_WEBOS_YELLOW && app->session != NULL
+            && session_accepting_input(app->session)) {
+            if (!e.key.repeat) {
+                LiSendMouseButtonEvent(e.type == SDL_KEYDOWN ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE,
+                                       BUTTON_RIGHT);
             }
             state->state = LV_INDEV_STATE_RELEASED;
             data->continue_reading = true;
